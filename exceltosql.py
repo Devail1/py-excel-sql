@@ -16,27 +16,28 @@ if os.path.isfile("jimalaya.xlsx"):
     df = pd.read_excel('jimalaya.xlsx')
     # check for duplicated email in the file
     sr = df["email"]
-    # if primary field is unique:   
+    # make sure primary field is unique:
     if (sr.is_unique):
-        club_id = input("Enter club's ID:") or '2400'
+        club_id = '2400'
+
         # casting date 
         df["start_date"] = df.membershp_start_date.dt.strftime('%m/%d/%Y')
         df["end_date"] = df.membership_end_date.dt.strftime('%m/%d/%Y')
-        # replacin nan with None
+
+        # replacin nan values with None
         df = df.astype('object').where(pd.notnull(df),None)
+
         # manipulating users data to match db dataframe
         usersdf = df.filter(['first_name', 'last_name', 'phone', 'email', 'start_date'])
         usersdf['id'] = df.index+1
         usersdf['club_id'] = club_id
         usersdf.rename(columns={"start_date": "joined_at"}, inplace = True)
-        # reindex users columns
         usersdf_reindexed = usersdf.reindex(columns=['id', 'first_name', 'last_name', 'phone', 'email', 'joined_at', 'club_id'])
 
         # manipulating membnerships data to match db dataframe
         membershipsdf = df.filter(['user_id', 'start_date', 'end_date', 'membership_name'])
         membershipsdf['id'] = df.index+1
         membershipsdf['user_id'] = usersdf.id
-        # reindex memberships columns
         membershipsdf_reindexed = membershipsdf.reindex(columns=['id', 'user_id', 'start_date', 'end_date', 'membership_name'])
 
         # generating create table statements
