@@ -9,8 +9,7 @@ $ git clone https://github.com/Devail1/py-excel-sql.git
 
 Install dependencies. Make sure you already have [`python`](https://www.python.org/downloads/windows/) installed on your system.
 ```bash
-$ pip install panda
-$ pip install numpy
+$ pip install panda numpy
 ```
 
 Run it
