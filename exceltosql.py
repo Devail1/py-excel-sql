@@ -11,19 +11,19 @@ def SQL_Insert(SOURCE, TARGET):
     return ('\n'.join(sql_texts))
 
 def users_adapter(df):
-        usersdf = df.filter(['first_name', 'last_name', 'phone', 'email', 'start_date'])
-        usersdf['id'] = df.index+1
-        usersdf['club_id'] = club_id
-        usersdf.rename(columns={"start_date": "joined_at"}, inplace = True)
-        usersdf_reformatted = usersdf.reindex(columns=['id', 'first_name', 'last_name', 'phone', 'email', 'joined_at', 'club_id'])
-        return (usersdf_reformatted)
+        users_df = df.filter(['first_name', 'last_name', 'phone', 'email', 'start_date'])
+        users_df['id'] = df.index+1
+        users_df['club_id'] = club_id
+        users_df.rename(columns={"start_date": "joined_at"}, inplace = True)
+        users_df_reformatted = users_df.reindex(columns=['id', 'first_name', 'last_name', 'phone', 'email', 'joined_at', 'club_id'])
+        return (users_df_reformatted)
     
-def memberships_adapter(usersdf_reformatted, df):
-        membershipsdf = df.filter(['user_id', 'start_date', 'end_date', 'membership_name'])
-        membershipsdf['id'] = df.index+1
-        membershipsdf['user_id'] = usersdf_reformatted.id
-        membershipsdf_reformatted = membershipsdf.reindex(columns=['id', 'user_id', 'start_date', 'end_date', 'membership_name'])
-        return (membershipsdf_reformatted)
+def memberships_adapter(users_df_reformatted, df):
+        memberships_df = df.filter(['user_id', 'start_date', 'end_date', 'membership_name'])
+        memberships_df['id'] = df.index+1
+        memberships_df['user_id'] = users_df_reformatted.id
+        memberships_df_reformatted = memberships_df.reindex(columns=['id', 'user_id', 'start_date', 'end_date', 'membership_name'])
+        return (memberships_df_reformatted)
 
 # check if db file exists
 if os.path.isfile("jimalaya.xlsx"):
@@ -43,16 +43,16 @@ if os.path.isfile("jimalaya.xlsx"):
         df = df.astype('object').where(pd.notnull(df),None)
 
         # manipulating data to match db dataframe
-        usersdf_reformatted = users_adapter(df)
-        membershipsdf_reformatted = memberships_adapter(usersdf_reformatted, df)
+        users_df_reformatted = users_adapter(df)
+        memberships_df_reformatted = memberships_adapter(users_df_reformatted, df)
 
         # generating create table statements
-        print(pd.io.sql.get_schema(usersdf_reformatted.reset_index(), 'users'))
-        print(pd.io.sql.get_schema(membershipsdf_reformatted.reset_index(), 'memberships'))
+        print(pd.io.sql.get_schema(users_df_reformatted.reset_index(), 'users'))
+        print(pd.io.sql.get_schema(memberships_df_reformatted.reset_index(), 'memberships'))
 
         # calling insert functions
-        usersq = SQL_Insert(usersdf_reformatted, 'users')
-        membershipsq = SQL_Insert(membershipsdf_reformatted, 'memberships')
+        usersq = SQL_Insert(users_df_reformatted, 'users')
+        membershipsq = SQL_Insert(memberships_df_reformatted, 'memberships')
 
         #print output
         print(usersq)
