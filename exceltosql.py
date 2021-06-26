@@ -10,7 +10,7 @@ def SQL_Insert(SOURCE, TARGET):
 
     return ('\n'.join(sql_texts))
 
-def users_adapter(df):
+def users_adapter_to_db(df):
         users_df = df.filter(['first_name', 'last_name', 'phone', 'email', 'start_date'])
         users_df['id'] = df.index+1
         users_df['club_id'] = club_id
@@ -18,7 +18,7 @@ def users_adapter(df):
         users_df_reformatted = users_df.reindex(columns=['id', 'first_name', 'last_name', 'phone', 'email', 'joined_at', 'club_id'])
         return (users_df_reformatted)
     
-def memberships_adapter(users_df_reformatted, df):
+def memberships_adapter_to_db(users_df_reformatted, df):
         memberships_df = df.filter(['user_id', 'start_date', 'end_date', 'membership_name'])
         memberships_df['id'] = df.index+1
         memberships_df['user_id'] = users_df_reformatted.id
@@ -43,8 +43,8 @@ if os.path.isfile("jimalaya.xlsx"):
         df = df.astype('object').where(pd.notnull(df),None)
 
         # manipulating data to match db dataframe
-        users_df_reformatted = users_adapter(df)
-        memberships_df_reformatted = memberships_adapter(users_df_reformatted, df)
+        users_df_reformatted = users_adapter_to_db(df)
+        memberships_df_reformatted = memberships_adapter_to_db(users_df_reformatted, df)
 
         # generating create table statements
         print(pd.io.sql.get_schema(users_df_reformatted.reset_index(), 'users'))
